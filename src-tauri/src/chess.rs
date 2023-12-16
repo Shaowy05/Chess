@@ -1,24 +1,266 @@
 use std::collections::HashMap;
-use std::ops;
+use std::{ops, vec};
 
-enum Direction {
-    North, South, East, West
-}
+pub const DEFAULT_INITIAL_BOARD: Board = Board {
+    pieces: vec![
+        (
+            Position {
+                rank: Rank::I,
+                file: File::A
+            },
+            Piece::Rook(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::I,
+                file: File::B
+            },
+            Piece::Knight(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::I,
+                file: File::C
+            },
+            Piece::Bishop(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::I,
+                file: File::D
+            },
+            Piece::Queen(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::I,
+                file: File::E
+            },
+            Piece::King(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::I,
+                file: File::F
+            },
+            Piece::Bishop(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::I,
+                file: File::G
+            },
+            Piece::Knight(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::I,
+                file: File::G
+            },
+            Piece::Rook(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::II,
+                file: File::A
+            },
+            Piece::Pawn(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::II,
+                file: File::B
+            },
+            Piece::Pawn(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::II,
+                file: File::C
+            },
+            Piece::Pawn(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::II,
+                file: File::D
+            },
+            Piece::Pawn(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::II,
+                file: File::E
+            },
+            Piece::Pawn(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::II,
+                file: File::F
+            },
+            Piece::Pawn(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::II,
+                file: File::G
+            },
+            Piece::Pawn(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::II,
+                file: File::H
+            },
+            Piece::Pawn(Colour::White)
+        ),
+        (
+            Position {
+                rank: Rank::VIII,
+                file: File::A
+            },
+            Piece::Rook(Colour::Black)
+        ),
+        (
+            Position {
+                rank: Rank::VIII,
+                file: File::B
+            },
+            Piece::Knight(Colour::Black)
+        ),
+        (
+            Position {
+                rank: Rank::VIII,
+                file: File::C
+            },
+            Piece::Bishop(Colour::Black)
+        ),
+        (
+            Position {
+                rank: Rank::VIII,
+                file: File::D
+            },
+            Piece::Queen(Colour::Black)
+        ),
+        (
+            Position {
+                rank: Rank::VIII,
+                file: File::E
+            },
+            Piece::King(Colour::Black)
+        ),
+        (
+            Position {
+                rank: Rank::VIII,
+                file: File::F
+            },
+            Piece::Bishop(Colour::Black)
+        ),
+        (
+            Position {
+                rank: Rank::VIII,
+                file: File::G
+            },
+            Piece::Knight(Colour::Black)
+        ),
+        (
+            Position {
+                rank: Rank::VIII,
+                file: File::G
+            },
+            Piece::Rook(Colour::Black)
+        ),
+        (
+            Position {
+                rank: Rank::VII,
+                file: File::A
+            },
+            Piece::Pawn(Colour::Black)
+        ),
+        (
+            Position {
+                rank: Rank::VII,
+                file: File::B
+            },
+            Piece::Pawn(Colour::Black)
+        ),
+        (
+            Position {
+                rank: Rank::VII,
+                file: File::C
+            },
+            Piece::Pawn(Colour::Black)
+        ),
+        (
+            Position {
+                rank: Rank::VII,
+                file: File::D
+            },
+            Piece::Pawn(Colour::Black)
+        ),
+        (
+            Position {
+                rank: Rank::VII,
+                file: File::E
+            },
+            Piece::Pawn(Colour::Black)
+        ),
+        (
+            Position {
+                rank: Rank::VII,
+                file: File::F
+            },
+            Piece::Pawn(Colour::Black)
+        ),
+        (
+            Position {
+                rank: Rank::VII,
+                file: File::G
+            },
+            Piece::Pawn(Colour::Black)
+        ),
+        (
+            Position {
+                rank: Rank::VII,
+                file: File::H
+            },
+            Piece::Pawn(Colour::Black)
+        ),
+    ].into_iter().collect()
+};
 
 enum Colour {
     White, Black
 }
 
-enum PieceType {
-    Pawn, Rook, Knight, Bishop, Queen, King
+enum Piece {
+    Pawn(Colour),
+    Rook(Colour),
+    Knight(Colour),
+    Bishop(Colour),
+    Queen(Colour),
+    King(Colour)
 }
 
-struct Piece {
-    piece_type: PieceType,
-    colour: Colour
+struct Translation {
+    north: usize,
+    east: usize,
+    south: usize,
+    west: usize
 }
 
-#[derive(Debug)]
+impl Translation {
+    // pub fn from_tuple((n, e, s, w): (usize, usize, usize, usize)) -> Self {
+    //     Self { north: n, east: e, south: s, west: w }
+    // }
+
+    pub fn new(n: usize, e: usize, s: usize, w: usize) -> Self {
+        Self { north: n, east: e, south: s, west: w }
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub enum Rank {
     I, II, III, IV, V, VI, VII, VIII
 }
@@ -67,6 +309,7 @@ impl ops::Sub<usize> for Rank {
     }    
 }
 
+#[derive(Debug, PartialEq, Eq, Hash)]
 enum File {
     A, B, C, D, E, F, G, H
 }
@@ -117,13 +360,37 @@ impl ops::Sub<usize> for File {
     }
 }
 
+#[derive(PartialEq, Eq, Hash)]
 struct Position {
     rank: Rank,
     file: File
 }
 
+#[derive(PartialEq, Eq)]
+struct Move {
+    from: Position,
+    to: Position
+}
+
 struct Board {
     pieces: HashMap<Position, Piece>,
+}
 
+impl Board {
+    fn make_move(&self, m: Move) -> Self {
+        Self {
+            pieces: self.pieces.into_iter().map(|x| {
+                if x.0 == m.from {
+                    (m.to, x.1)
+                } else {
+                    x
+                }
+            } ).into_iter().collect()
+        }
+    }
+}
 
+struct Game {
+    initial_board: Board,
+    turns
 }
