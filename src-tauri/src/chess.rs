@@ -86,7 +86,8 @@ enum PieceType {
 #[derive(Debug, PartialEq, Clone)]
 enum MoveType {
     Strafe(Direction, usize),
-    Jump(JumpDirection)
+    Jump(JumpDirection),
+    Double(Direction)
 }
 
 impl MoveType {
@@ -97,7 +98,8 @@ impl MoveType {
 
         return match self {
             Strafe(d, n) => d.unit() * *n as isize,
-            Jump(d) => d.as_vector()
+            Jump(d) => d.as_vector(),
+            Double(d) => d.unit() * 2
         }
     }
 }
@@ -111,6 +113,10 @@ struct Piece {
 struct Vector {
     x: isize,
     y: isize
+}
+
+impl Vector {
+    pub fn new(x: isize, y: isize) -> Self { Self { x, y} }
 }
 
 impl ops::Add<Vector> for Vector {
@@ -195,6 +201,54 @@ impl ops::Sub<usize> for Rank {
     }    
 }
 
+impl ops::Sub<Rank> for Rank {
+    type Output = Vector;
+
+    fn sub(self, rhs: Rank) -> Self::Output {
+        let mut found = false;
+        let mut counter: usize = 0;
+        let mut v: Vector;
+
+        while !found {
+            let r = self + counter;
+
+            match r {
+                Some(rank) => if rank == rhs {
+                    found = true;
+                    v = Vector::new(0, counter.try_into().unwrap())
+                } else {
+                    counter += 1;
+                },
+                None => {
+                    found = true;
+                }
+            }
+        }
+
+        found = false;
+        counter = 0;
+
+        while !found {
+            let r = self - counter;
+
+            match r {
+                Some(rank) => if rank == rhs {
+                    found = true;
+                    v = Vector::new(0, counter.try_into().unwrap());
+                    v = v * -1;
+                } else {
+                    counter += 1;
+                },
+                None => {
+                    found = true;
+                }
+            }
+        }
+
+        return v;
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 enum File {
     A, B, C, D, E, F, G, H
@@ -246,6 +300,54 @@ impl ops::Sub<usize> for File {
     }
 }
 
+impl ops::Sub<File> for File {
+    type Output = Vector;
+
+    fn sub(self, rhs: File) -> Self::Output {
+        let mut found = false;
+        let mut counter: usize = 0;
+        let mut v: Vector;
+
+        while !found {
+            let r = self + counter;
+
+            match r {
+                Some(file) => if file == rhs {
+                    found = true;
+                    v = Vector::new(counter.try_into().unwrap(), 0);
+                } else {
+                    counter += 1;
+                },
+                None => {
+                    found = true;
+                }
+            }
+        }
+
+        found = false;
+        counter = 0;
+
+        while !found {
+            let r = self - counter;
+
+            match r {
+                Some(file) => if file == rhs {
+                    found = true;
+                    v = Vector::new(counter.try_into().unwrap(), 0);
+                    v = v * -1;
+                } else {
+                    counter += 1;
+                },
+                None => {
+                    found = true;
+                }
+            }
+        }
+
+        return v;
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Position {
     rank: Rank,
@@ -281,6 +383,14 @@ impl ops::Add<Vector> for Position {
             })
         }
 
+    }
+}
+
+impl ops::Sub<Position> for Position {
+    type Output = Vector;
+
+    fn sub(self, rhs: Position) -> Self::Output {
+        
     }
 }
 
@@ -370,14 +480,54 @@ impl Game {
                 None => generate_default_board()
             };
 
-            let pieces: Vec<Piece> = current_board.pieces
-                .into_iter()
-                .filter(|(_, p)| p.colour == colour)
-                .map(|(_, p)| p)
-                .collect();
+            let mut colour_pieces: HashMap<Position, Piece> = HashMap::default();
 
+            for (pos, pce) in current_board.pieces {
+                if pce.colour == colour {
+                    colour_pieces.insert(pos, pce);
+                }
+            }
 
+            let possible_moves: Vec<Move> = Vec::default();
+
+            for 
 
         }
+    }
+
+    fn get_possible_moves(
+        board: Board,
+        previous_move: Option<Move>
+    ) -> Vec<Move> {
+        use PieceType::*;
+        use MoveType::*;
+
+        let mut moves: Vec<Move> = Vec::default();
+
+        for (position, piece) in board.pieces {
+            match piece.piece_type {
+                Pawn => {
+                    let possible_moves: Vec<Move>;
+
+                    let opposite_direction: Direction;
+
+                    if piece.colour == Colour::White {
+                        opposite_direction = Direction::South;
+                    } else {
+                        opposite_direction = Direction::North;
+                    }
+
+                    let Some(m) = previous_move;
+                    let Some(p) = m.to;
+
+                    // Creating the vector from the current piece to the
+                    // previously moved piece.
+                    let v = p
+
+                }
+            }
+        }
+
+        vec![]
     }
 }
